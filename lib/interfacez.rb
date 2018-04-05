@@ -152,7 +152,7 @@ module Interfacez
   # Get index of network interface.
   def self.index_of(interface)
     raw_interface_addresses.each do |iface|
-      return iface.ifindex if iface.name == iface
+      return iface.ifindex if iface.name == interface
     end
     return nil
   end

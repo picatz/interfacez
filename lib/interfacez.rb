@@ -148,6 +148,14 @@ module Interfacez
     return nil if addresses.nil? 
     return addresses[0]
   end
+  
+  # Get index of network interface.
+  def self.index_of(interface)
+    raw_interface_addresses.each do |iface|
+      return iface.ifindex if iface.name == iface
+    end
+    return nil
+  end
 
   # :nodoc:
   def self.raw_interface_addresses
@@ -156,4 +164,5 @@ module Interfacez
     warn "Unable to get raw interface address list from Socket class"
     return []
   end
+
 end

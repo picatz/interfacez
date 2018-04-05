@@ -19,6 +19,25 @@ module Interfacez
     Interfacez.ipv6_loopbacks { |iface| return iface }
   end
 
+  # Check for any (ipv4 or ipv6) loopback interface.
+  def self.loopback?
+    Interfacez.ipv4_loopbacks { |iface| return true }
+    Interfacez.ipv6_loopbacks { |iface| return true }
+    return false
+  end
+
+  # Get all (ipv4 or ipv6) loopback interfaces.
+  def self.loopbacks
+    if block_given?
+      Interfacez.ipv4_loopbacks { |iface| yield iface }
+      Interfacez.ipv6_loopbacks { |iface| yield iface }
+    else
+      loopbacks = []
+      Interfacez.loopbacks { |l| loopbacks << l unless loopbacks.any?(l) }
+      return loopbacks
+    end
+  end
+
   # First available ipv4 loopback interface.
   def self.ipv4_loopback
     Interfacez.ipv4_loopbacks { |iface| return iface }
@@ -26,13 +45,16 @@ module Interfacez
 
   # All ipv4 loopback interfaces.
   def self.ipv4_loopbacks
-    results = []
-    raw_interface_addresses.each do |iface| 
-      next unless iface.addr.ipv4_loopback?
-      yield iface.name if block_given?
-      results << iface.name
+    if block_given?
+      raw_interface_addresses.each do |iface| 
+        next unless iface.addr.ipv4_loopback?
+        yield iface.name if block_given?
+      end
+    else
+      results = []
+      Interfacez.ipv4_loopbacks { |l| results << l }
+      return results 
     end
-    return results
   end
 
   # First available ipv6 loopback interface.
@@ -42,13 +64,16 @@ module Interfacez
 
   # All ipv6 loopback interfaces.
   def self.ipv6_loopbacks
-    results = []
-    raw_interface_addresses.each do |iface| 
-      next unless iface.addr.ipv6_loopback?
-      yield iface.name if block_given?
-      results << iface.name
+    if block_given?
+      raw_interface_addresses.each do |iface| 
+        next unless iface.addr.ipv6_loopback?
+        yield iface.name if block_given?
+      end
+    else
+      results = []
+      Interfacez.ipv4_loopbacks { |l| results << l }
+      return results 
     end
-    return results
   end
 
   # All network interface names available on system. 
@@ -64,7 +89,8 @@ module Interfacez
 
   # Network interfaces with their ipv4 addresses, if they have
   # any asscoited with it.
-  def self.ipv4_addresses
+  def self.ipv4_addresses(interface = nil)
+    return ipv4_addresses_of(interface) unless interface.nil?
     results = Hash.new()
     raw_interface_addresses.each do |iface|
       if iface.addr.ipv4?
@@ -80,9 +106,22 @@ module Interfacez
     return results
   end
 
+  # Return all ipv4 addresses of a given interface.
+  def self.ipv4_address_of(interface)
+    addresses = Interfacez.ipv4_addresses[interface]
+    return nil if addresses.nil?
+    return addresses[0]
+  end
+
+  # Return the first ipv4 address of a given interface.
+  def self.ipv4_addresses_of(interface)
+    return Interfacez.ipv4_addresses[interface] || []
+  end
+
   # Network interfaces with their ipv6 addresses, if they have
   # any asscoited with it.
-  def self.ipv6_addresses
+  def self.ipv6_addresses(interface = nil)
+    return ipv6_addresses_of(interface) unless interface.nil?
     results = Hash.new()
     raw_interface_addresses.each do |iface|
       if iface.addr.ipv6?
@@ -96,6 +135,18 @@ module Interfacez
       end
     end
     return results
+  end
+
+  # Return all available ipv6 addreses of a given interface.
+  def self.ipv6_addresses_of(interface)
+    return Interfacez.ipv4_addresses[interface] || []
+  end
+
+  # Return the first ipv6 address of a given interface.
+  def self.ipv6_address_of(interface)
+    addresses = Interfacez.ipv6_addresses_of(interface)
+    return nil if addresses.nil? 
+    return addresses[0]
   end
 
   # :nodoc:

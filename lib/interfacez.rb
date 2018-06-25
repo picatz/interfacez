@@ -171,8 +171,11 @@ module Interfacez
     elsif Socket.const_defined? :PF_PACKET 
       list = raw_interface_addresses.map! do |iface|
         next unless iface.name == interface
-        nameinfo = addr.addr.inspect_sockaddr[/hwaddr=([\h:]+)/, 1]
+        iface.addr.inspect_sockaddr[/hwaddr=([\h:]+)/, 1]
       end.compact
+    else
+      warn "This platform may not be fully supported!"
+      return []
     end
   end
   

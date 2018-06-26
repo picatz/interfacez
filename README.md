@@ -11,15 +11,18 @@
 require 'interfacez'
 
 Interfacez.default
-# => en0
+# => "en0"
 
 Interfacez.loopback
-# => lo0
+# => "lo0"
 
 Interfacez.all do |interface|
   # do something with interface name
   puts interface
 end
+
+Interfacez.ipv4_address_of("en0")
+# => ["192.168.1.2"]
 ```
 
 ## License

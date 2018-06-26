@@ -10,4 +10,8 @@ RSpec.describe Interfacez do
   it "has a loopback method" do
     expect(Interfacez.loopback).to be
   end
+  
+  it "has a mac_address_of method" do
+    expect(Interfacez.mac_address_of(Interfacez.default)).to be
+  end
 end

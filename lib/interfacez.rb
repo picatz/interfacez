@@ -149,6 +149,36 @@ module Interfacez
     return addresses[0]
   end
   
+  # Return first available mac addresses of a given interface.
+  def self.mac_address_of(interface)
+    list = Interfacez.mac_addresses_of(interface)
+    return nil if list.size.zero?
+    return list[0]
+  end
+  
+  # Return all available mac addresses of a given interface.
+  def self.mac_addresses_of(interface)
+    # BSD support
+    if Socket.const_defined? :PF_LINK
+      list = raw_interface_addresses.map! do |iface|
+        next unless iface.name == interface
+        nameinfo = iface.addr.getnameinfo
+        if nameinfo.first != "" && nameinfo.last == ""
+          nameinfo[0]
+        end
+      end.compact
+    # Linux support
+    elsif Socket.const_defined? :PF_PACKET 
+      list = raw_interface_addresses.map! do |iface|
+        next unless iface.name == interface
+        iface.addr.inspect_sockaddr[/hwaddr=([\h:]+)/, 1]
+      end.compact
+    else
+      warn "This platform may not be fully supported!"
+      return []
+    end
+  end
+  
   # Get index of network interface.
   def self.index_of(interface)
     raw_interface_addresses.each do |iface|

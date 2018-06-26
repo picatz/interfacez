@@ -139,7 +139,7 @@ module Interfacez
 
   # Return all available ipv6 addreses of a given interface.
   def self.ipv6_addresses_of(interface)
-    return Interfacez.ipv4_addresses[interface] || []
+    return Interfacez.ipv6_addresses[interface] || []
   end
 
   # Return the first ipv6 address of a given interface.

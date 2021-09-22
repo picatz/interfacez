@@ -47,6 +47,7 @@ module Interfacez
   def self.ipv4_loopbacks
     if block_given?
       raw_interface_addresses.each do |iface| 
+        next unless iface.addr
         next unless iface.addr.ipv4_loopback?
         yield iface.name if block_given?
       end
@@ -66,6 +67,7 @@ module Interfacez
   def self.ipv6_loopbacks
     if block_given?
       raw_interface_addresses.each do |iface| 
+        next unless iface.addr
         next unless iface.addr.ipv6_loopback?
         yield iface.name if block_given?
       end
@@ -93,6 +95,7 @@ module Interfacez
     return ipv4_addresses_of(interface) unless interface.nil?
     results = Hash.new()
     raw_interface_addresses.each do |iface|
+      next unless iface.addr
       if iface.addr.ipv4?
         results[iface.name] = [] unless results[iface.name]
         results[iface.name] << iface.addr.ip_address
@@ -124,6 +127,7 @@ module Interfacez
     return ipv6_addresses_of(interface) unless interface.nil?
     results = Hash.new()
     raw_interface_addresses.each do |iface|
+      next unless iface.addr
       if iface.addr.ipv6?
         results[iface.name] = [] unless results[iface.name]
         results[iface.name] << iface.addr.ip_address
@@ -162,6 +166,7 @@ module Interfacez
     if Socket.const_defined? :PF_LINK
       list = raw_interface_addresses.map! do |iface|
         next unless iface.name == interface
+        next unless iface.addr
         nameinfo = iface.addr.getnameinfo
         if nameinfo.first != "" && nameinfo.last == ""
           nameinfo[0]
@@ -171,6 +176,7 @@ module Interfacez
     elsif Socket.const_defined? :PF_PACKET 
       list = raw_interface_addresses.map! do |iface|
         next unless iface.name == interface
+        next unless iface.addr
         iface.addr.inspect_sockaddr[/hwaddr=([\h:]+)/, 1]
       end.compact
     else
